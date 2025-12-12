@@ -378,7 +378,7 @@ with st.form("weather_form"):
         humidity = st.slider("Độ ẩm (%)", 0, 100, int(st.session_state.form_vals['Humidity']))
         
     with col2:
-        pressure = st.number_input("Áp suất (hPa)", min_value = 500.0, max_value = 1110.0, value=float(st.session_state.form_vals['Atmospheric Pressure']))
+        pressure = st.number_input("Áp suất (hPa)", min_value = 850.0, max_value = 1110.0, value=float(st.session_state.form_vals['Atmospheric Pressure']))
         wind_speed = st.number_input("Tốc độ gió (km/h)", value=float(st.session_state.form_vals['Wind Speed']))
         precipitation = st.number_input("Khả năng mưa / Lượng mưa (%)", min_value = 0.0, max_value = 100.0, value=float(st.session_state.form_vals['Precipitation (%)']))
         
