@@ -374,11 +374,11 @@ with st.form("weather_form"):
         location = st.selectbox("Vị trí", options=['inland', 'mountain', 'coastal'],
                             index=['inland', 'mountain', 'coastal'].index(ss_loc))
         
-        temperature = st.number_input("Nhiệt độ (°C)", min_value = -70.0, max_value = 70.0, value=float(st.session_state.form_vals['Temperature']))
+        temperature = st.number_input("Nhiệt độ (°C)", min_value = -80.0, max_value = 80.0, value=float(st.session_state.form_vals['Temperature']))
         humidity = st.slider("Độ ẩm (%)", 0, 100, int(st.session_state.form_vals['Humidity']))
         
     with col2:
-        pressure = st.number_input("Áp suất (hPa)", min_value = 860.0, max_value = 1100.0, value=float(st.session_state.form_vals['Atmospheric Pressure']))
+        pressure = st.number_input("Áp suất (hPa)", min_value = 800.0, max_value = 1110.0, value=float(st.session_state.form_vals['Atmospheric Pressure']))
         wind_speed = st.number_input("Tốc độ gió (km/h)", value=float(st.session_state.form_vals['Wind Speed']))
         precipitation = st.number_input("Khả năng mưa / Lượng mưa (%)", min_value = 0.0, max_value = 100.0, value=float(st.session_state.form_vals['Precipitation (%)']))
         
