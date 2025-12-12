@@ -133,7 +133,7 @@ def get_weather_data_no_key(lat, lon, target_date):
         url = "https://api.open-meteo.com/v1/forecast"
         params = {
             "latitude": lat, "longitude": lon,
-            "hourly": "temperature_2m,relative_humidity_2m,rain,surface_pressure,cloud_cover,visibility,wind_speed_10m,uv_index",
+            "hourly": "temperature_2m,relative_humidity_2m,rain,pressure_msl,cloud_cover,visibility,wind_speed_10m,uv_index",
             "timezone": "auto",
             "start_date": target_date.strftime("%Y-%m-%d"),
             "end_date": target_date.strftime("%Y-%m-%d")
@@ -145,7 +145,7 @@ def get_weather_data_no_key(lat, lon, target_date):
         url = "https://archive-api.open-meteo.com/v1/archive"
         params = {
             "latitude": lat, "longitude": lon,
-            "hourly": "temperature_2m,relative_humidity_2m,rain,surface_pressure,cloud_cover,visibility,wind_speed_10m",
+            "hourly": "temperature_2m,relative_humidity_2m,rain,pressure_msl,cloud_cover,visibility,wind_speed_10m",
             "timezone": "auto",
             "start_date": target_date.strftime("%Y-%m-%d"),
             "end_date": target_date.strftime("%Y-%m-%d")
@@ -174,7 +174,7 @@ def get_weather_data_no_key(lat, lon, target_date):
             "Humidity": hourly['relative_humidity_2m'][idx],
             "Wind Speed": hourly['wind_speed_10m'][idx],
             "Precipitation (%)": 90.0 if hourly['rain'][idx] > 0.5 else 0.0, # Ước lượng % mưa dựa trên lượng mưa mm
-            "Atmospheric Pressure": hourly['surface_pressure'][idx],
+            "Atmospheric Pressure": hourly['pressure_msl'][idx],
             "Cloud Cover": map_cloud_cover(hourly['cloud_cover'][idx]),
             "Season": get_season(target_date.month),
             "Visibility (km)": (hourly['visibility'][idx] / 1000) if hourly['visibility'][idx] else 10.0,
