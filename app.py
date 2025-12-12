@@ -225,9 +225,8 @@ if 'form_vals' not in st.session_state:
 col_date, _ = st.columns([1, 2])
 with col_date:
     max_date = date.today() + timedelta(days=14)
-    selected_date = st.date_input("📅 Bước 1: Chọn ngày dự báo", value=date.today(), max_value=max_date)
+    selected_date = st.date_input("📅Chọn ngày ", value=date.today(), max_value=max_date)
 
-st.write("👇 **Bước 2: Xác định vị trí**")
 
 # TẠO 2 TAB CHO 2 CÁCH NHẬP LIỆU
 tab_map, tab_manual = st.tabs(["🗺️ Chọn trên Bản đồ", "✍️ Nhập thủ công (Quốc gia/TP)"])
