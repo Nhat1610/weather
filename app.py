@@ -343,7 +343,6 @@ if should_fetch_data:
         else:
             st.error(f"Lỗi: {err}")
 
-st.divider()
 
 # --- THANH TRẠNG THÁI ---
 
