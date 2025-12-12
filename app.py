@@ -346,10 +346,6 @@ if should_fetch_data:
 st.divider()
 
 # --- THANH TRẠNG THÁI ---
-if st.session_state.current_location_label:
-    st.success(f"📍 Đang chọn: {st.session_state.current_location_label} | 📅 Ngày: **{selected_date.strftime('%d/%m/%Y')}**")
-else:
-    st.info("👈 Vui lòng chọn địa điểm trước.")
 
 st.divider()
 if st.session_state.current_location_label:
