@@ -206,6 +206,16 @@ st.markdown("""
 
 
 st.title("🌏 Chọn Địa Điểm & Dữ Liệu")
+col_date, col_btn = st.columns([2, 1])
+with col_date:
+    max_date = date.today() + timedelta(days=14)
+    selected_date = st.date_input("📅 Chọn ngày dự báo", value=date.today(), max_value=max_date)
+
+with col_btn:
+    st.write("") # Khoảng trống căn lề
+    st.write("") 
+    # Nút này để lấy dữ liệu mới khi bạn đổi ngày (mà không cần chọn lại địa điểm)
+    refresh_btn = st.button("🔄 Lấy dữ liệu ngày này", type="primary", use_container_width=True)
 
 # Khởi tạo session state cần thiết
 if 'current_lat' not in st.session_state: st.session_state.current_lat = None
