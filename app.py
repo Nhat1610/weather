@@ -375,13 +375,13 @@ with st.form("weather_form"):
         location = st.selectbox("Vị trí", options=['inland', 'mountain', 'coastal'],
                             index=['inland', 'mountain', 'coastal'].index(ss_loc))
         
-        temperature = st.number_input("Nhiệt độ (°C)", value=float(st.session_state.form_vals['Temperature']))
+        temperature = st.number_input("Nhiệt độ (°C)", min_value = -70.0, max_value = 70.0, value=float(st.session_state.form_vals['Temperature']))
         humidity = st.slider("Độ ẩm (%)", 0, 100, int(st.session_state.form_vals['Humidity']))
         
     with col2:
-        pressure = st.number_input("Áp suất (hPa)", value=float(st.session_state.form_vals['Atmospheric Pressure']))
+        pressure = st.number_input("Áp suất (hPa)", min_value = 860.0, max_value = 1100.0, value=float(st.session_state.form_vals['Atmospheric Pressure']))
         wind_speed = st.number_input("Tốc độ gió (km/h)", value=float(st.session_state.form_vals['Wind Speed']))
-        precipitation = st.number_input("Khả năng mưa / Lượng mưa (%)", value=float(st.session_state.form_vals['Precipitation (%)']))
+        precipitation = st.number_input("Khả năng mưa / Lượng mưa (%)", min_value = 0, max_value = 100, value=float(st.session_state.form_vals['Precipitation (%)']))
         
         valid_clouds = ['clear', 'partly cloudy', 'cloudy', 'overcast']
         current_cloud = st.session_state.form_vals['Cloud Cover']
@@ -389,8 +389,8 @@ with st.form("weather_form"):
         cloud_cover = st.selectbox("Độ che phủ mây", options=valid_clouds, index=c_idx)
     
     col3, col4 = st.columns(2)
-    with col3: uv_index = st.slider("Chỉ số UV", 0, 15, int(st.session_state.form_vals['UV Index']))
-    with col4: visibility = st.slider("Tầm nhìn (km)", 0.0, 20.0, float(st.session_state.form_vals['Visibility (km)']))
+    with col3: uv_index = st.slider("Chỉ số UV", 0, 20, int(st.session_state.form_vals['UV Index']))
+    with col4: visibility = st.slider("Tầm nhìn (km)", 0.0, 100.0, float(st.session_state.form_vals['Visibility (km)']))
 
     submitted = st.form_submit_button("🚀 CHẠY DỰ BÁO", use_container_width=True)
 
