@@ -205,15 +205,16 @@ st.markdown("""
 # --- THÊM IMPORT Ở ĐẦU FILE ---
 
 
+# ==========================================
+# GIAO DIỆN CHÍNH (FULL TÍNH NĂNG)
+# ==========================================
 st.title("🌏 Chọn Địa Điểm & Dữ Liệu")
 
-
-# Khởi tạo session state cần thiết
+# 1. Khởi tạo Session State (Bộ nhớ đệm)
 if 'current_lat' not in st.session_state: st.session_state.current_lat = None
 if 'current_lon' not in st.session_state: st.session_state.current_lon = None
 if 'last_processed_click' not in st.session_state: st.session_state.last_processed_click = None
 if 'current_location_label' not in st.session_state: st.session_state.current_location_label = None
-# Biến lưu danh sách thành phố tìm được để gợi ý
 if 'city_search_results' not in st.session_state: st.session_state.city_search_results = []
 if 'form_vals' not in st.session_state:
     st.session_state.form_vals = {
@@ -222,11 +223,12 @@ if 'form_vals' not in st.session_state:
         "Season": "Spring", "Location": "inland", "Cloud Cover": "partly cloudy"
     }
 
-# --- PHẦN 1: CHỌN NGÀY ---
+# --- PHẦN 1: CHỌN NGÀY & NÚT CẬP NHẬT (QUAN TRỌNG) ---
 col_date, col_btn = st.columns([2, 1])
+
 with col_date:
     max_date = date.today() + timedelta(days=14)
-    selected_date = st.date_input("📅 Chọn ngày dự báo", value=date.today(), max_value=max_date)
+    selected_date = st.date_input("📅 Bước 1: Chọn ngày dự báo", value=date.today(), max_value=max_date)
 
 with col_btn:
     st.write("") # Khoảng trống căn lề
@@ -234,16 +236,15 @@ with col_btn:
     # Nút này để lấy dữ liệu mới khi bạn đổi ngày (mà không cần chọn lại địa điểm)
     refresh_btn = st.button("🔄 Lấy dữ liệu ngày này", type="primary", use_container_width=True)
 
+st.write("👇 **Bước 2: Xác định vị trí**")
 
-# TẠO 2 TAB CHO 2 CÁCH NHẬP LIỆU
+# --- PHẦN 2: TAB CHỌN ĐỊA ĐIỂM ---
 tab_map, tab_manual = st.tabs(["🗺️ Chọn trên Bản đồ", "✍️ Nhập thủ công (Quốc gia/TP)"])
 
 should_fetch_data = False
 fetch_source = ""
 
-# ==========================================
-# TAB 1: BẢN ĐỒ (Logic cũ đã tối ưu)
-# ==========================================
+# >>> TAB 1: BẢN ĐỒ
 with tab_map:
     m = folium.Map(location=[16.047, 108.206], zoom_start=4, tiles="CartoDB positron")
     m.add_child(folium.LatLngPopup())
@@ -251,114 +252,105 @@ with tab_map:
 
     if map_output and map_output['last_clicked']:
         current_click = map_output['last_clicked']
+        # Chỉ xử lý khi click mới khác click cũ
         if current_click != st.session_state.last_processed_click:
             st.session_state.last_processed_click = current_click
-            st.session_state.current_lat = max(-90, min(90, current_click['lat']))
-            st.session_state.current_lon = ((current_click['lng']+180)%360)-180
             
-            loc_name = get_location_name(st.session_state.current_lat, st.session_state.current_lon)
+            # Xử lý tọa độ (Fix lỗi kinh độ/vĩ độ ảo)
+            raw_lat, raw_lon = current_click['lat'], current_click['lng']
+            lon_click = ((raw_lon + 180) % 360) - 180
+            lat_click = max(-90, min(90, raw_lat))
+            
+            # Lưu vào bộ nhớ
+            st.session_state.current_lat = lat_click
+            st.session_state.current_lon = lon_click
+            
+            # Lấy tên hiển thị
+            loc_name = get_location_name(lat_click, lon_click)
             st.session_state.current_location_label = f"**{loc_name}**"
+            
             should_fetch_data = True
             fetch_source = "map"
 
-# ==========================================
-# TAB 2: NHẬP THỦ CÔNG (TÍNH NĂNG MỚI)
-# ==========================================
+# >>> TAB 2: NHẬP TAY
 with tab_manual:
     col_country, col_city = st.columns(2)
-    
     with col_country:
-        # 1. Lấy danh sách quốc gia từ thư viện pycountry
-        # Tạo list tuple (Tên hiển thị, Mã ISO 2 chữ cái)
-        # Ví dụ: ("Vietnam", "VN"), ("United States", "US")
+        # Load danh sách quốc gia
         countries = sorted([(country.name, country.alpha_2) for country in pycountry.countries], key=lambda x: x[0])
         country_names = [c[0] for c in countries]
-        
-        # Mặc định chọn Vietnam (index tìm theo tên)
-        try:
-            default_ix = country_names.index("Viet Nam")
-        except:
-            default_ix = 0
-            
-        selected_country_name = st.selectbox("1. Chọn Quốc gia:", country_names, index=default_ix)
-        # Lấy mã ISO (VD: 'VN') tương ứng với tên đã chọn
+        try: default_ix = country_names.index("Viet Nam")
+        except: default_ix = 0
+        selected_country_name = st.selectbox("1. Quốc gia:", country_names, index=default_ix)
         selected_country_code = next(c[1] for c in countries if c[0] == selected_country_name)
 
     with col_city:
-        # 2. Ô nhập tên thành phố
-        city_query = st.text_input("2. Nhập tên thành phố (rồi nhấn Enter):", placeholder="VD: Ha Noi, Da Nang...")
+        city_query = st.text_input("2. Thành phố (Enter để tìm):", placeholder="VD: Ha Noi...")
 
-    # Logic tìm kiếm
     if city_query:
-        # Gọi API Search của Open-Meteo
         search_url = "https://geocoding-api.open-meteo.com/v1/search"
-        # count=10 để lấy nhiều gợi ý
         params = {"name": city_query, "count": 10, "language": "en", "format": "json"}
-        
         try:
             res = requests.get(search_url, params=params).json()
             if "results" in res:
-                # Lọc kết quả: Chỉ lấy thành phố thuộc Quốc gia đã chọn
-                # API trả về 'country_code' (VD: 'VN'). Ta so sánh với selected_country_code
-                filtered_cities = [
+                st.session_state.city_search_results = [
                     item for item in res["results"] 
                     if item.get("country_code", "").upper() == selected_country_code
                 ]
-                st.session_state.city_search_results = filtered_cities
-            else:
-                st.session_state.city_search_results = []
-        except:
-            st.warning("Lỗi kết nối tìm kiếm.")
+            else: st.session_state.city_search_results = []
+        except: pass
 
-    # 3. Hiển thị kết quả gợi ý (Dropdown)
     if st.session_state.city_search_results:
-        # Tạo danh sách hiển thị đẹp: "Tên TP - Khu vực (Lat, Lon)"
-        options = {
-            f"{item['name']} - {item.get('admin1', '')} ({item['latitude']:.2f}, {item['longitude']:.2f})": item 
-            for item in st.session_state.city_search_results
-        }
+        options = {f"{i['name']} ({i.get('admin1','')})": i for i in st.session_state.city_search_results}
+        s_key = st.selectbox("3. Kết quả:", list(options.keys()))
         
-        selected_option_key = st.selectbox("3. Chọn kết quả chính xác:", list(options.keys()))
-        
-        # Nút xác nhận
-        if st.button("✅ Dùng địa điểm này", type="primary"):
-            chosen_city = options[selected_option_key]
-            
-            # Cập nhật Session State
-            st.session_state.current_lat = chosen_city['latitude']
-            st.session_state.current_lon = chosen_city['longitude']
-            st.session_state.current_location_label = f"**{chosen_city['name']}, {selected_country_name}**"
-            
+        if st.button("✅ Chọn địa điểm này"):
+            chosen = options[s_key]
+            st.session_state.current_lat = chosen['latitude']
+            st.session_state.current_lon = chosen['longitude']
+            st.session_state.current_location_label = f"**{chosen['name']}, {selected_country_name}**"
             should_fetch_data = True
             fetch_source = "manual"
-            
     elif city_query:
-        st.warning(f"Không tìm thấy thành phố '{city_query}' tại {selected_country_name}.")
+        st.caption("Không tìm thấy kết quả phù hợp.")
 
+# --- XỬ LÝ LOGIC NÚT CẬP NHẬT ---
+if refresh_btn:
+    if st.session_state.current_lat is not None:
+        should_fetch_data = True
+        fetch_source = "button"
+    else:
+        st.toast("⚠️ Bạn chưa chọn địa điểm nào!", icon="Vk")
 
-# ==========================================
-# PHẦN CHUNG: GỌI API THỜI TIẾT
-# ==========================================
+# --- GỌI API LẤY DỮ LIỆU ---
 if should_fetch_data:
     lat = st.session_state.current_lat
     lon = st.session_state.current_lon
     
-    with st.spinner(f"Đang tải dữ liệu ngày {selected_date.strftime('%d/%m')}..."):
+    with st.spinner(f"Đang tải dữ liệu ngày {selected_date}..."):
+        # Gọi hàm lấy thời tiết (đã sửa lỗi áp suất 860 ở bài trước)
         weather_data, err = get_weather_data_no_key(lat, lon, selected_date)
         
         if weather_data:
             st.session_state.form_vals.update(weather_data)
             
-            if fetch_source == "manual":
-                st.toast(f"Đã cập nhật: {st.session_state.current_location_label}", icon="🎯")
-            elif fetch_source == "map":
-                st.toast("Đã cập nhật từ bản đồ", icon="📍")
-                
+            # Thông báo
+            if fetch_source == "map": st.toast("Đã cập nhật từ Bản đồ", icon="📍")
+            elif fetch_source == "manual": st.toast("Đã cập nhật từ Nhập tay", icon="✍️")
+            elif fetch_source == "button": st.toast(f"Đã cập nhật ngày {selected_date}", icon="🔄")
+            
             st.rerun()
         else:
             st.error(f"Lỗi: {err}")
 
-# HIỂN THỊ TRẠNG THÁI HIỆN TẠI
+st.divider()
+
+# --- THANH TRẠNG THÁI ---
+if st.session_state.current_location_label:
+    st.success(f"📍 Đang chọn: {st.session_state.current_location_label} | 📅 Ngày: **{selected_date.strftime('%d/%m/%Y')}**")
+else:
+    st.info("👈 Vui lòng chọn địa điểm trước.")
+
 st.divider()
 if st.session_state.current_location_label:
     st.success(f"📍 Đang chọn: {st.session_state.current_location_label} - Dữ liệu ngày: **{selected_date.strftime('%d/%m/%Y')}**")
