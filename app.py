@@ -195,7 +195,7 @@ render_header()
 st.markdown("""
 <style>
     div[data-testid="stForm"] {
-        background-color: #f0f8ff; 
+        background-color: transparent; 
         border: 2px solid #2196F3; 
         border-radius: 15px; 
         padding: 20px;
