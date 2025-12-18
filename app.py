@@ -420,3 +420,8 @@ if submitted:
     fig_w = plt.figure(figsize=(8, 6))
     shap.waterfall_plot(expl, show=False)
     st.pyplot(fig_w, use_container_width=False)
+    
+st.info(
+    "⚠️ Đây là bản demo học thuật. Mô hình được huấn luyện trên dữ liệu nhân tạo, "
+    "kết quả dự đoán mang tính minh họa, không thay thế dự báo khí tượng chính thức."
+)
